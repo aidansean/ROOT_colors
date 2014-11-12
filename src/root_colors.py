@@ -1,6 +1,7 @@
 import ROOT
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
+# Set the style of everything
 GS = ROOT.gStyle
 GS.SetOptStat(0)
 GS.SetPadTickX(1)
@@ -16,13 +17,16 @@ GS.SetPadColor(ROOT.kWhite)
 GS.SetStatColor(ROOT.kWhite)
 GS.SetErrorX(0)
 
+# Tweak some values to save some space and make things look good
 GS.SetPadRightMargin(0.05)
 GS.SetPadLeftMargin(0.12)
 GS.SetPadTopMargin(0.05)
 
+# Canvas size (changing this means retweaking the above!)
 cw = 800
 ch = 600
 
+# Create colors
 class color_object:
     def __init__(self, name, ROOT_color, start, end):
         self.ROOT_color = ROOT_color
@@ -49,6 +53,7 @@ colors.append(color_object('kWhite'  , 0            , 0, 9 ))
 colors.append(color_object('kGray'   , ROOT.kGray   , 0, 3 ))
 nRow = len(colors)
 
+# Decide how far to go in the +ve and -ve directions in terms of shades
 x_lower = -9
 x_upper = 11
 nCol = x_upper-x_lower
@@ -56,15 +61,18 @@ nCol = x_upper-x_lower
 y_lower = 0
 y_upper = nRow
 
+# Create a histogram to hold the labels
+# This is lazy, but it works well
 hBase = ROOT.TH2F('hBase','',nCol,x_lower,x_upper,nRow,y_lower,y_upper)
 hBase.GetXaxis().SetTitle('Index')
-#hBase.GetXaxis().SetTicks('+-')
-#hBase.GetYaxis().SetTicks('+-')
-hBase.GetXaxis().SetTitleOffset(1.25)
-hBase.GetXaxis().SetLabelSize(0.05)
-hBase.GetYaxis().SetLabelSize(0.05)
-#hBase.GetYaxis().SetTitle('Color')
+#hBase.GetXaxis().SetTicks('+-') # Only really used for debugging things
+#hBase.GetYaxis().SetTicks('+-') # Only really used for debugging things
+hBase.GetXaxis().SetTitleOffset(1.25) # Give some more space for bin labels
+hBase.GetXaxis().SetLabelSize(0.05) # About as big as is comfortable given the other tweaks
+hBase.GetYaxis().SetLabelSize(0.05) # About as big as is comfortable given the other tweaks
+#hBase.GetYaxis().SetTitle('Color') # Remove to save space/reduce clutter
 
+# Set labels on axes
 for i in range(0,len(colors)):
     hBase.GetYaxis().SetBinLabel(i+1,colors[i].name)
 for bin in range(1,hBase.GetXaxis().GetNbins()+1):
@@ -72,6 +80,7 @@ for bin in range(1,hBase.GetXaxis().GetNbins()+1):
     value = hBase.GetXaxis().GetBinCenter(bin)-0.5
     hBase.GetXaxis().SetBinLabel(bin,'%s%.0f'%(sign,value))
 
+# Now create a box per color
 boxes = []
 for r in range(0,nRow):
     for c in range(0,nCol):
@@ -95,6 +104,7 @@ for r in range(0,nRow):
         box.SetLineWidth(1)
         boxes.append(box)
 
+# Draw everything and save to file
 canvas = ROOT.TCanvas('canvas', '', 0, 0, cw, ch)
 hBase.Draw()
 for b in boxes:
